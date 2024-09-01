@@ -168,7 +168,7 @@ spec:
         - type: CombineFromComposite
           combine:
             variables:
-              - fromFieldPath: spec.parameters.id
+              - fromFieldPath: spec.id
             strategy: string
             string:
               fmt: "%s-worker-ng-1"
