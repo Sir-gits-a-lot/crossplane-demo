@@ -1,6 +1,6 @@
 ---
 apiVersion: xcloud.io/v1alpha1
-kind: XClusters
+kind: XCluster
 metadata:
   name: demo-eks
   labels:
