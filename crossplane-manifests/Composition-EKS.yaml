@@ -8,7 +8,7 @@ metadata:
 spec:
   compositeTypeRef:
     apiVersion: xcloud.io/v1alpha1
-    kind: CompositeCluster
+    kind: XCluster
   writeConnectionSecretsToNamespace: crossplane-system
   patchSets:
     - name: metadata
