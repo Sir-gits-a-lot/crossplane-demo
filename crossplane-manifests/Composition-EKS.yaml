@@ -1377,19 +1377,9 @@ spec:
                 type: subnet
                 access: private
                 zone: 1a
-            tags:
-              - key: Name
       patches:
         - type: PatchSet
           patchSetName: providerConfigRef
-        - type: CombineFromComposite
-          combine:
-            variables:
-              - fromFieldPath: spec.id
-            strategy: string
-            string:
-              fmt: "%s-public-route-table-association"
-          toFieldPath: spec.forProvider.tags[0].Name
         - type: PatchSet
           patchSetName: common-parameters
         - fromFieldPath: spec.id
@@ -1417,19 +1407,9 @@ spec:
                 type: subnet
                 access: private
                 zone: 1b
-            tags:
-              key: Name
       patches:
         - type: PatchSet
           patchSetName: providerConfigRef
-        - type: CombineFromComposite
-          combine:
-            variables:
-              - fromFieldPath: spec.id
-            strategy: string
-            string:
-              fmt: "%s-private-route-table-association-1b"
-          toFieldPath: spec.forProvider.tags.Name
         - type: PatchSet
           patchSetName: common-parameters
         - fromFieldPath: spec.id
@@ -1457,19 +1437,9 @@ spec:
                 natGatewayIdSelector:
                   matchLabels:
                     type: natgw
-            tags:
-              key: Name
       patches:
         - type: PatchSet
           patchSetName: providerConfigRef
-        - type: CombineFromComposite
-          combine:
-            variables:
-              - fromFieldPath: spec.id
-            strategy: string
-            string:
-              fmt: "%s-private-route-table"
-          toFieldPath: spec.forProvider.tags.Name
         - type: PatchSet
           patchSetName: common-parameters
         - fromFieldPath: spec.id
