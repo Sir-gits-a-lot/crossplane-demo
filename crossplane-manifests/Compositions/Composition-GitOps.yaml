@@ -1,0 +1,219 @@
+apiVersion: apiextensions.crossplane.io/v1
+kind: Composition
+metadata:
+  name: gitops-argo-cd
+  labels:
+    provider: argo
+spec:
+  compositeTypeRef:
+    apiVersion: xcloud.io/v1alpha1
+    kind: XGitOps
+  patchSets:
+    - name: metadata
+      patches:
+        - fromFieldPath: metadata.labels
+  resources:
+    - name: helm
+      base:
+        apiVersion: helm.crossplane.io/v1beta1
+        kind: ProviderConfig
+        spec:
+          credentials:
+            source: Secret
+            secretRef:
+              key: kubeconfig
+      patches:
+        - fromFieldPath: spec.id
+          toFieldPath: metadata.name
+        - fromFieldPath: spec.parameters.kubeConfig.secretNamespace
+          toFieldPath: spec.credentials.secretRef.namespace
+        - fromFieldPath: spec.parameters.kubeConfig.secretName
+          toFieldPath: spec.credentials.secretRef.name
+        - fromFieldPath: spec.parameters.kubeConfig.secretKey
+          toFieldPath: spec.credentials.secretRef.key
+      readinessChecks:
+        - type: None
+    - name: argocd
+      base:
+        apiVersion: helm.crossplane.io/v1beta1
+        kind: Release
+        spec:
+          deletionPolicy: Orphan
+          rollbackLimit: 3
+          forProvider:
+            namespace: argocd
+            chart:
+              name: argo-cd
+              repository: https://argoproj.github.io/argo-helm
+            set:
+              - name: configs.cm.timeout.reconciliation
+                value: "60s"
+              - name: controller.args.appResyncPeriod
+                value: "30"
+              - name: configs.secret.argocdServerAdminPassword
+                value: "$2a$04$WBhxphMK2Ar2A2y.yofXxunU4I9GWmzF7oRylWPNgZm/O8u95LAhq"
+      patches:
+        - fromFieldPath: spec.id
+          toFieldPath: metadata.name
+          transforms:
+            - type: string
+              string:
+                fmt: "%s-argocd"
+        - fromFieldPath: spec.id
+          toFieldPath: spec.providerConfigRef.name
+    - name: kubernetes
+      base:
+        apiVersion: kubernetes.crossplane.io/v1alpha1
+        kind: ProviderConfig
+        spec:
+          credentials:
+            source: Secret
+            secretRef:
+              key: kubeconfig
+      patches:
+        - fromFieldPath: spec.id
+          toFieldPath: metadata.name
+        - fromFieldPath: spec.parameters.kubeConfig.secretNamespace
+          toFieldPath: spec.credentials.secretRef.namespace
+        - fromFieldPath: spec.parameters.kubeConfig.secretName
+          toFieldPath: spec.credentials.secretRef.name
+        - fromFieldPath: spec.parameters.kubeConfig.secretKey
+          toFieldPath: spec.credentials.secretRef.key
+      readinessChecks:
+        - type: None
+    - name: private-repo
+      base:
+        apiVersion: kubernetes.crossplane.io/v1alpha1
+        kind: Object
+        spec:
+          forProvider:
+            manifest:
+              apiVersion: v1
+              kind: Secret
+              metadata:
+                name: private-repo
+                namespace: argocd
+                labels:
+                  argocd.argoproj.io/secret-type: repository
+              stringData:
+                type: git
+                url: https://github.com/Sir-gits-a-lot/crossplane-demo
+                username: utkarshmishra@tataelxsi.co.in+1-at-084726943794
+                password: JaDdZ2DiP0vi9AD3CHlO2TEp0jChcuLp/Xs4LM1cDW8=
+      patches:
+        - fromFieldPath: spec.id
+          toFieldPath: metadata.name
+          transforms:
+            - type: string
+              string:
+                fmt: "%s-private-repo"
+        - fromFieldPath: spec.id
+          toFieldPath: spec.providerConfigRef.name
+
+    - name: argocd-project-dev
+      base:
+        apiVersion: kubernetes.crossplane.io/v1alpha1
+        kind: Object
+        spec:
+          forProvider:
+            manifest:
+              apiVersion: argoproj.io/v1alpha1
+              kind: AppProject
+              metadata:
+                name: development
+                namespace: argocd
+                finalizers:
+                  - resources-finalizer.argocd.argoproj.io/background
+              spec:
+                description: Development project
+                sourceRepos:
+                  - "*"
+                destinations:
+                  - namespace: "*"
+                    server: "*"
+                clusterResourceWhitelist:
+                  - group: "*"
+                    kind: "*"
+                namespaceResourceWhitelist:
+                  - group: "*"
+                    kind: "*"
+      patches:
+        - fromFieldPath: spec.id
+          toFieldPath: metadata.name
+          transforms:
+            - type: string
+              string:
+                fmt: "%s-argocd-project-dev"
+        - fromFieldPath: spec.id
+          toFieldPath: spec.providerConfigRef.name
+
+    - name: argocd-app-of-apps
+      base:
+        apiVersion: kubernetes.crossplane.io/v1alpha1
+        kind: Object
+        spec:
+          forProvider:
+            manifest:
+              apiVersion: argoproj.io/v1alpha1
+              kind: Application
+              metadata:
+                name: app-of-apps
+                namespace: argocd
+                finalizers:
+                  - resources-finalizer.argocd.argoproj.io/background
+              spec:
+                project: development
+                source:
+                  repoURL: https://github.com/Sir-gits-a-lot/crossplane-demo
+                  targetRevision: HEAD
+                  path: ./declarative/manifests/app-of-apps
+                destination:
+                  server: https://kubernetes.default.svc
+                  namespace: argocd
+                syncPolicy:
+                  automated:
+                    prune: true
+                    selfHeal: true
+      patches:
+        - fromFieldPath: spec.id
+          toFieldPath: metadata.name
+          transforms:
+            - type: string
+              string:
+                fmt: "%s-argocd-app-of-apps"
+        - fromFieldPath: spec.id
+          toFieldPath: spec.providerConfigRef.name
+        - fromFieldPath: spec.parameters.gitOpsRepo
+          toFieldPath: spec.forProvider.manifest.spec.source.repoURL
+
+  # - name: ingress
+  #   base:
+  #     apiVersion: helm.crossplane.io/v1beta1
+  #     kind: Release
+  #     metadata:
+  #       name: ingress
+  #     spec:
+  #       rollbackLimit: 3
+  #       forProvider:
+  #         namespace: ingress-nginx
+  #         chart:
+  #           name: ingress-nginx
+  #           repository: https://kubernetes.github.io/ingress-nginx
+  #           version: 4.2.0
+  #         values:
+  #           controller:
+  #             ingressClassResource:
+  #               default: true
+  #             annotations:
+  #               service.beta.kubernetes.io/aws-load-balancer-backend-protocol: tcp
+  #               service.beta.kubernetes.io/aws-load-balancer-cross-zone-load-balancing-enabled: "true"
+  #               service.beta.kubernetes.io/aws-load-balancer-type: nlb
+  #   patches:
+  #   - fromFieldPath: spec.id
+  #     toFieldPath: metadata.name
+  #     transforms:
+  #     - type: string
+  #       string:
+  #         fmt: '%s-ingress'
+  #   - fromFieldPath: spec.id
+  #     toFieldPath: spec.providerConfigRef.name

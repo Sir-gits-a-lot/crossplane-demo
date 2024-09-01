@@ -1,0 +1,9 @@
+---
+# CRDs for IAM service
+apiVersion: pkg.crossplane.io/v1
+kind: Provider
+metadata:
+  name: provider-aws-iam
+spec:
+  package: xpkg.upbound.io/upbound/provider-aws-iam:v1.4.0
+

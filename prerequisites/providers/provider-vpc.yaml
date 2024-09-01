@@ -1,0 +1,8 @@
+---
+# CRDs for VPC service
+apiVersion: pkg.crossplane.io/v1
+kind: Provider
+metadata:
+  name: provider-aws-vpc
+spec:
+  package: xpkg.upbound.io/upbound/provider-aws-vpc:v1.4.0

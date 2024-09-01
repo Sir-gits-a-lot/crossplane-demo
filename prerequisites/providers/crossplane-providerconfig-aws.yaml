@@ -1,0 +1,20 @@
+---
+# PARAMETERS TO PATCH:
+# ===================
+#
+# .metadata.name: (default: "default") Name of the `ProviderConfig` for the cloud credentials.
+# .spec.credentials.secretRef.name: (default: "aws-creds") Name of the secret where the credentials are stored.
+
+# Default configuration for AWS provider for Crossplane
+apiVersion: aws.upbound.io/v1beta1
+kind: ProviderConfig
+metadata:
+  name: default
+spec:
+  credentials:
+    source: Secret
+    secretRef:
+      namespace: crossplane-system
+      name: aws-creds
+      key: creds
+      
