@@ -11,7 +11,7 @@ spec:
   source:
     repoURL: https://github.com/Sir-gits-a-lot/crossplane-demo
     targetRevision: HEAD
-    path: ./clusters
+    path: ./xplanes/clusters
 
   destination:
     server: https://kubernetes.default.svc
