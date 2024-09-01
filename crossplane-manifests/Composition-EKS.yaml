@@ -1297,19 +1297,9 @@ spec:
                 type: subnet
                 access: public
                 zone: 1a
-            tags:
-              key: Name
       patches:
         - type: PatchSet
           patchSetName: providerConfigRef
-        - type: CombineFromComposite
-          combine:
-            variables:
-              - fromFieldPath: spec.id
-            strategy: string
-            string:
-              fmt: "%s-public-route-table-association-1a"
-          toFieldPath: spec.forProvider.tags.Name
         - type: PatchSet
           patchSetName: common-parameters
         - fromFieldPath: spec.id
@@ -1337,19 +1327,9 @@ spec:
                 type: subnet
                 access: public
                 zone: 1b
-            tags:
-              key: Name
       patches:
         - type: PatchSet
           patchSetName: providerConfigRef
-        - type: CombineFromComposite
-          combine:
-            variables:
-              - fromFieldPath: spec.id
-            strategy: string
-            string:
-              fmt: "%s-public-route-table-association-1b"
-          toFieldPath: spec.forProvider.tags.Name
         - type: PatchSet
           patchSetName: common-parameters
         - fromFieldPath: spec.id
