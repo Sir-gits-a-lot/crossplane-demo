@@ -1219,19 +1219,9 @@ spec:
               matchLabels:
                 type: routetable
                 access: public
-            tags:
-              key: Name
       patches:
         - type: PatchSet
           patchSetName: providerConfigRef
-        - type: CombineFromComposite
-          combine:
-            variables:
-              - fromFieldPath: spec.id
-            strategy: string
-            string:
-              fmt: "%s-public-route"
-          toFieldPath: spec.forProvider.tags.Name
         - type: PatchSet
           patchSetName: common-parameters
         - fromFieldPath: spec.id
@@ -1257,19 +1247,9 @@ spec:
               matchLabels:
                 type: routetable
                 access: private
-            tags:
-              key: Name
       patches:
         - type: PatchSet
           patchSetName: providerConfigRef
-        - type: CombineFromComposite
-          combine:
-            variables:
-              - fromFieldPath: spec.id
-            strategy: string
-            string:
-              fmt: "%s-private-route"
-          toFieldPath: spec.forProvider.tags.Name
         - type: PatchSet
           patchSetName: common-parameters
         - fromFieldPath: spec.id
