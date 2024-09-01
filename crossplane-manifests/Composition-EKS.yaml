@@ -1378,7 +1378,7 @@ spec:
                 access: private
                 zone: 1a
             tags:
-              key: Name
+              - key: Name
       patches:
         - type: PatchSet
           patchSetName: providerConfigRef
@@ -1389,7 +1389,7 @@ spec:
             strategy: string
             string:
               fmt: "%s-public-route-table-association"
-          toFieldPath: spec.forProvider.tags.Name
+          toFieldPath: spec.forProvider.tags[0].Name
         - type: PatchSet
           patchSetName: common-parameters
         - fromFieldPath: spec.id
